@@ -1,0 +1,116 @@
+---
+title: "Exploratory Data Analysis"
+author: "STOR 320/520.002 Group 11"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+
+# Import Data Below
+# read_csv()
+```
+
+# Creator: Neil Vakharia
+
+### Q1: What are the most popular foods? What are the most popular cuisines? [Geographic analysis]
+
+```{r}
+#
+```
+
+### Q2: What are the most common preparation/cooking steps and does this impact how the recipe is interacted with?
+
+```{r}
+#
+```
+
+# Interpreter: Jasmin Alvarez Martinez
+
+### Q1: What are the most used ingredients?
+
+```{r}
+#
+```
+
+### Q2: What are popular terms in titles (most appear)?
+
+```{r}
+#
+```
+
+# Orator: Theresa Yu
+
+### Q1: What is the seasonal breakdown of food recipes (i.e. do the most interacted with food items vary by the season?)
+
+```{r}
+#
+```
+
+### Q2: Is there a correlation between recipe difficulty and the sentiment of the recipe interaction?
+
+```{r}
+#
+```
+
+# Deliverer: Victoria Sagasta Pereira
+
+### Q1: Does nutrition play a factor into how often we see recipes/how well they are perceived?
+
+```{r}
+#
+```
+
+### Q2: What were trends surrounding recipes during COVID as opposed to otherwise?
+
+```{r}
+#
+```
+
+# Follow-up Questions
+
+### New Questions Based Off Initial Investigation
+
+- Q1: Is there a relationship between the variables (calories, total fat, sugar, protein) and user interactions?
+- Q2: Is there any relationship between the # of steps in the recipe and the # of user interactions that the recipe receives?
+- Q3: Does the number of ingredients impact the rating given to the recipe?
+- Q4: Could the length of the recipe title have an impact on how much the recipe is interacted with?
+
+### Investigation of Follow-up Questions
+
+GIVE WHAT 2 QUESTIONS YOU ATTEMPTED TO INVESTIGATE FURTHER IN COMPLETE SENTENCES (*Example:* Our group decided to investigate Q2 and Q4 in further detail.)
+
+SHOW AT LEAST 2 TABLES OR FIGURES BELOW THAT EXPLORE ANSWERS FOR THE QUESTIONS YOU ARE INVESTIGATING FURTHER.
+
+```{r}
+#
+```
+
+```{r}
+#
+```
+
+# Summary
+
+GIVE A 2 PARAGRAPH SUMMARY. 
+
+PARAGRAPH 1 SHOULD DESCRIBE WHAT YOU LEARNED ABOUT YOUR DATA FROM INVESTIGATING THE INITIAL QUESTIONS. DID YOU FIND ANYTHING UNUSUAL IN YOUR DATA? DID ANYTHING SURPRISE YOU? WHICH OF THE INITIAL QUESTIONS WERE HELPFUL IN LEADING YOU TO MORE QUESTIONS?
+
+PARAGRAPH 2 SHOULD SUMMARIZE WHAT YOU LEARNED FROM INVESTIGATING THE FOLLOW-UP QUESTIONS. WHY ARE THESE FOLLOW-UP QUESTIONS INTERESTING FOR INVESTIGATION? DESCRIBE THE TABLES/FIGURES YOU USED TO EXPLORE ANSWERS TO THESE FOLLOW-UP QUESTIONS? WHAT DID YOU LEARN FROM THE TABLES/FIGURES REGARDING THE FOLLOW-UP QUESTIONS YOU PROPOSED?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
