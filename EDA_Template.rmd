@@ -108,14 +108,49 @@ top_20_words
 ### Q1: What is the seasonal breakdown of food recipes (i.e. do the most interacted with food items vary by the season?)
 
 ```{r}
-#
+head(recipes)
+head(interactions)
+
+names(interactions)[names(interactions) == 'recipe_id'] = 'id'
+
+recipeinteraction = interactions %>%
+  inner_join(recipes, by = 'id') %>%
+  select('name','id','n_steps','n_ingredients','rating','date')
+
+head(recipeinteraction)
+
 ```
+```{r}
+recipeinteraction$month = format(as.Date(recipeinteraction$date, format="%Y-%m-%d"),"%m")
+recipeinteraction$month = as.numeric(recipeinteraction$month)
+
+#categorize into seasons
+recipeinteraction$season = 0
+recipeinteraction$season[(recipeinteraction$month >= 1 & recipeinteraction$month < 3) | recipeinteraction$month == 12] = 'winter'
+recipeinteraction$season[recipeinteraction$month >= 3 & recipeinteraction$month < 6] = 'spring'
+recipeinteraction$season[recipeinteraction$month >=6 & recipeinteraction$month < 9] = 'summer'
+recipeinteraction$season[recipeinteraction$month >= 9 & recipeinteraction$month < 12] = 'fall'
+head(recipeinteraction)
+```
+```{r}
+fall = subset(recipeinteraction,season == 'fall')
+ggplot(fall, aes(x = rating)) + geom_bar()
+winter = subset(recipeinteraction,season == 'winter')
+ggplot(winter, aes(x = rating)) + geom_bar()
+spring = subset(recipeinteraction,season == 'spring')
+ggplot(spring, aes(x = rating)) + geom_bar()
+summer = subset(recipeinteraction,season == 'summer')
+ggplot(summer, aes(x = rating)) + geom_bar()
+
+```
+Based off of a visual scan of these 4 charts, it does not look like there is a significant pattern change in ratings based off of the season. All 4 charts look fairly similar, with there being the highest proportion of 5 ratings. 
 
 ### Q2: Is there a correlation between recipe difficulty and the sentiment of the recipe interaction?
 
 ```{r}
-#
+ggplot(recipeinteraction, aes(x = rating,y=n_steps+n_ingredients, group = rating)) + geom_boxplot() + ylim(0,50)
 ```
+By using a sum of the number of steps and the number of ingredients as a proxy for difficulty of recipe, we see that there doesn't seem to be a significant correlation between that sum and the rating of the recipe. 
 
 # Deliverer: Victoria Sagasta Pereira
 
