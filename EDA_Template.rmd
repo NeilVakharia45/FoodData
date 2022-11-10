@@ -42,6 +42,9 @@ ggplot(data=sorted_recipe_ratings, aes(x=recipe_id, y=rating)) +
   ylab('Rating')
 ```
 
+This graph represents the ratings that each recipe falls in. Most of the data points fall within the 4-5 range.  
+
+
 ### Q2: What are the most common preparation/cooking steps and does this impact how the recipe is interacted with?
 
 ```{r}
@@ -102,6 +105,7 @@ top_10_ingredients %>%
   ylab("Ingredient Count")
   
 ```
+
 Based on this bar graph, we found that the most used ingredient is salt. The bar graph displays the most used ingredients based on the ingredient count by combining all recipes together and they are ascednding from left to right. 
 
 ### Q2: What are popular terms in titles (most appear)?
@@ -132,6 +136,7 @@ top_20_words = titles_separated %>%
 
 top_20_words
 ```
+
 A bar graph was used to answer this question to visually see the ordering of the most popular terms used in recipe titles. Our findings show that the term 'chicken' is the most used term in recipe titles. We also found that the term 'easy' is found in the top 20 terms used in recipe titles. 
 
 # Orator: Theresa Yu
