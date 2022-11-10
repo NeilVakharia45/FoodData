@@ -211,7 +211,8 @@ recipe_ingredients_ratings %>%
 ```
 
 ```{r}
-#
+#Question 2
+
 ```
 
 # Summary
@@ -221,6 +222,7 @@ GIVE A 2 PARAGRAPH SUMMARY.
 PARAGRAPH 1 SHOULD DESCRIBE WHAT YOU LEARNED ABOUT YOUR DATA FROM INVESTIGATING THE INITIAL QUESTIONS. DID YOU FIND ANYTHING UNUSUAL IN YOUR DATA? DID ANYTHING SURPRISE YOU? WHICH OF THE INITIAL QUESTIONS WERE HELPFUL IN LEADING YOU TO MORE QUESTIONS?
 
 In the interpreter's question's, we found that we had to perform some type of stop word removal for the second question. Something unusual in that data set was the use of the word 'easy' being a common word to a recipe's title, whereas the other top 20 names include some relation to food.  
+In the two questions given by the orator, the results for fairly inconclusive. Based off of the graphs that were made in pursuit of finding an answer for these questions, we were unable to conclude whether there was a distinct relationship between the variables. Something unusual we found here was that there is a disproportionate amount of 5 star ratings. 
 
 PARAGRAPH 2 SHOULD SUMMARIZE WHAT YOU LEARNED FROM INVESTIGATING THE FOLLOW-UP QUESTIONS. WHY ARE THESE FOLLOW-UP QUESTIONS INTERESTING FOR INVESTIGATION? DESCRIBE THE TABLES/FIGURES YOU USED TO EXPLORE ANSWERS TO THESE FOLLOW-UP QUESTIONS? WHAT DID YOU LEARN FROM THE TABLES/FIGURES REGARDING THE FOLLOW-UP QUESTIONS YOU PROPOSED?
 
