@@ -12,6 +12,7 @@ library(dplyr)
 
 # Import Data Below
 users = read_csv('PP_users.csv')
+pp_recipes = read_csv('PP_recipes.csv')
 interactions = read_csv('RAW_interactions.csv')
 interactions_test = read_csv('interactions_test.csv')
 recipes = read_csv('RAW_recipes.csv')
@@ -22,13 +23,34 @@ recipes = read_csv('RAW_recipes.csv')
 ### Q1: What are the most popular foods? What are the most popular cuisines? [Geographic analysis]
 
 ```{r}
-#
+recipe_ratings <- interactions %>% 
+  group_by(recipe_id) %>% 
+  summarise(rating=mean(rating), .groups = 'drop')
+
+sorted_recipe_ratings=recipe_ratings[order(recipe_ratings$rating, decreasing = TRUE),]
+
+head(sorted_recipe_ratings, 20)
+
+```
+```{r}
+ggplot(data=sorted_recipe_ratings, aes(x=recipe_id, y=rating)) +
+  geom_point(stat="identity", size=.5)
 ```
 
 ### Q2: What are the most common preparation/cooking steps and does this impact how the recipe is interacted with?
 
 ```{r}
-#
+total_techniques=c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+
+for(row in pp_recipes$techniques){
+  for(i in 1:58){
+    total_techniques[i]=total_techniques[i]+as.double(substring(row, (i-1)*3+2, (i-1)*3+2))
+  }
+}
+
+total_techniques
+
+
 ```
 
 # Interpreter: Jasmin Alvarez Martinez
@@ -110,20 +132,16 @@ top_20_words
 ```{r}
 head(recipes)
 head(interactions)
-
 names(interactions)[names(interactions) == 'recipe_id'] = 'id'
-
 recipeinteraction = interactions %>%
   inner_join(recipes, by = 'id') %>%
   select('name','id','n_steps','n_ingredients','rating','date')
-
 head(recipeinteraction)
-
 ```
+
 ```{r}
 recipeinteraction$month = format(as.Date(recipeinteraction$date, format="%Y-%m-%d"),"%m")
 recipeinteraction$month = as.numeric(recipeinteraction$month)
-
 #categorize into seasons
 recipeinteraction$season = 0
 recipeinteraction$season[(recipeinteraction$month >= 1 & recipeinteraction$month < 3) | recipeinteraction$month == 12] = 'winter'
@@ -141,8 +159,8 @@ spring = subset(recipeinteraction,season == 'spring')
 ggplot(spring, aes(x = rating)) + geom_bar()
 summer = subset(recipeinteraction,season == 'summer')
 ggplot(summer, aes(x = rating)) + geom_bar()
-
 ```
+
 Based off of a visual scan of these 4 charts, it does not look like there is a significant pattern change in ratings based off of the season. All 4 charts look fairly similar, with there being the highest proportion of 5 ratings. 
 
 ### Q2: Is there a correlation between recipe difficulty and the sentiment of the recipe interaction?
@@ -150,6 +168,7 @@ Based off of a visual scan of these 4 charts, it does not look like there is a s
 ```{r}
 ggplot(recipeinteraction, aes(x = rating,y=n_steps+n_ingredients, group = rating)) + geom_boxplot() + ylim(0,50)
 ```
+
 By using a sum of the number of steps and the number of ingredients as a proxy for difficulty of recipe, we see that there doesn't seem to be a significant correlation between that sum and the rating of the recipe. 
 
 # Deliverer: Victoria Sagasta Pereira
@@ -187,8 +206,8 @@ recipes_n_ingredients = recipes %>%
   select(id, n_ingredients)
 
 recipe_ratings = interactions %>%
-  select(recipe_id, rating)%>%
-  group_by(recipe_id) %>%
+  select(id, rating)%>%
+  group_by(id) %>%
   filter(n()>=100)%>%
   summarize(mean(rating))
 
@@ -196,7 +215,7 @@ recipe_ratings = interactions %>%
 
 ```{r}
 #Merging data sets
-recipe_ingredients_ratings = left_join(recipes_n_ingredients,recipe_ratings, by=c('id'= 'recipe_id'))
+recipe_ingredients_ratings = left_join(recipes_n_ingredients,recipe_ratings, by=c('id'))
 
 colnames(recipe_ingredients_ratings)[3] = "rating"
 ```
@@ -211,8 +230,7 @@ recipe_ingredients_ratings %>%
 ```
 
 ```{r}
-#Question 2
-
+#
 ```
 
 # Summary
