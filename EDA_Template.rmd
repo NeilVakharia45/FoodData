@@ -8,9 +8,13 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(dplyr)
 
 # Import Data Below
-# read_csv()
+users = read_csv('PP_users.csv')
+interactions = read_csv('RAW_interactions.csv')
+interactions_test = read_csv('interactions_test.csv')
+recipes = read_csv('RAW_recipes.csv')
 ```
 
 # Creator: Neil Vakharia
@@ -32,13 +36,71 @@ library(tidyverse)
 ### Q1: What are the most used ingredients?
 
 ```{r}
-#
+#separating each list (ingredient) found in the ingredients column into rows
+ingredients_separated = recipes %>%
+  select(ingredients) %>%
+  separate_rows(ingredients, sep="\\, ")
+```
+
+
+```{r}
+#counting the number of times the ingredient appears, removing brackets
+number_of_ingredients = ingredients_separated %>%
+  mutate(ingredients = str_replace_all(ingredients, "\\[|\\]|\\'", "")) %>%
+  group_by(ingredients) %>%
+  summarize(count=n())
+```
+
+```{r}
+#top 10 ingredients
+top_10_ingredients = number_of_ingredients %>%
+  arrange(desc(count)) %>%
+  head(10)
+```
+
+```{r}
+top_10_ingredients_list = top_10_ingredients %>%
+  select(ingredients) %>%
+  as.vector()
+  
+```
+
+```{r}
+#plotting the data
+top_10_ingredients %>%
+  ggplot(aes(x= reorder(ingredients,count), y=count, fill=ingredients))+
+  geom_bar(stat='identity') +
+  labs(title = 'most used ingredients in recipes (top 10)', x='ingredient name', y='ingredient count')
+  
 ```
 
 ### Q2: What are popular terms in titles (most appear)?
 
 ```{r}
-#
+#single titles separated to rows
+titles_separated = recipes %>%
+  select(name)%>%
+  separate_rows(name, sep="[[:blank:]]")%>%
+  mutate(name = str_replace_all(name, "[[0-9]]", ""))%>%
+  group_by(name) %>%
+  summarize(count=n())%>%
+  arrange(desc(count)) %>%
+  filter(!(name%in% c("", "and", "with", "s")))%>%
+  head(20)
+```
+
+
+```{r}
+#plotting the data
+theme_set(theme_bw())
+top_20_words = titles_separated %>%
+  ggplot(aes(x=reorder(name, count), y=count))+
+  geom_point(size=3)+
+  geom_segment(aes(x=name, xend=name, y=0, yend=count))+
+  labs(title = 'top 20 words used in recipe titles', x='name')+
+  theme(axis.text.x = element_text(angle=65, vjust=0.6))
+
+top_20_words
 ```
 
 # Orator: Theresa Yu
@@ -85,7 +147,32 @@ GIVE WHAT 2 QUESTIONS YOU ATTEMPTED TO INVESTIGATE FURTHER IN COMPLETE SENTENCES
 SHOW AT LEAST 2 TABLES OR FIGURES BELOW THAT EXPLORE ANSWERS FOR THE QUESTIONS YOU ARE INVESTIGATING FURTHER.
 
 ```{r}
-#
+# Question 3 
+recipes_n_ingredients = recipes %>%
+  select(id, n_ingredients)
+
+recipe_ratings = interactions %>%
+  select(recipe_id, rating)%>%
+  group_by(recipe_id) %>%
+  filter(n()>=100)%>%
+  summarize(mean(rating))
+
+```
+
+```{r}
+#Merging data sets
+recipe_ingredients_ratings = left_join(recipes_n_ingredients,recipe_ratings, by=c('id'= 'recipe_id'))
+
+colnames(recipe_ingredients_ratings)[3] = "rating"
+```
+
+```{r}
+#graphing merged data
+recipe_ingredients_ratings %>%
+  ggplot(aes(x=rating, y=n_ingredients, color=rating))+
+  geom_point(alpha=1/10) +
+  geom_smooth(method=lm)
+  labs(title='correlation between ratings and number of ingredients used in a recipe')
 ```
 
 ```{r}
@@ -98,10 +185,11 @@ GIVE A 2 PARAGRAPH SUMMARY.
 
 PARAGRAPH 1 SHOULD DESCRIBE WHAT YOU LEARNED ABOUT YOUR DATA FROM INVESTIGATING THE INITIAL QUESTIONS. DID YOU FIND ANYTHING UNUSUAL IN YOUR DATA? DID ANYTHING SURPRISE YOU? WHICH OF THE INITIAL QUESTIONS WERE HELPFUL IN LEADING YOU TO MORE QUESTIONS?
 
+In the interpreter's question's, we found that we had to perform some type of stop word removal for the second question. Something unusual in that data set was the use of the word 'easy' being a common word to a recipe's title, whereas the other top 20 names include some relation to food.  
+
 PARAGRAPH 2 SHOULD SUMMARIZE WHAT YOU LEARNED FROM INVESTIGATING THE FOLLOW-UP QUESTIONS. WHY ARE THESE FOLLOW-UP QUESTIONS INTERESTING FOR INVESTIGATION? DESCRIBE THE TABLES/FIGURES YOU USED TO EXPLORE ANSWERS TO THESE FOLLOW-UP QUESTIONS? WHAT DID YOU LEARN FROM THE TABLES/FIGURES REGARDING THE FOLLOW-UP QUESTIONS YOU PROPOSED?
 
-
-
+These follow up questions are important for further investigation because they tackle a more in-depth analysis. For our third question, we used a correlation plot to visually see the correlation, if any, between the number of ingredients used in a recipe and the average rating given to that recipe. We specifically utilized the recipes that had over 100 ratings to better narrow down our data set. If we were to include all the data points, we would have recipes that have one user star rating, which would not impact the overall average rating of that recipe. Despite this change, our findings show that there is little to no correlation between the number of ingredients used in a recipe and the average user rating for that recipe. Our initial thoughts were that the more ingredients used, the lower the ratings because there might have been some difficulty on behalf of the user because of the number of ingredients used. 
 
 
 
