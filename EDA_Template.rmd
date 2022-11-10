@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(dplyr)
+library(ggpubr)
 
 # Import Data Below
 users = read_csv('PP_users.csv')
@@ -32,9 +33,13 @@ sorted_recipe_ratings=recipe_ratings[order(recipe_ratings$rating, decreasing = T
 head(sorted_recipe_ratings, 20)
 
 ```
+
 ```{r}
 ggplot(data=sorted_recipe_ratings, aes(x=recipe_id, y=rating)) +
-  geom_point(stat="identity", size=.5)
+  geom_point(stat="identity", size=.5)+
+  ggtitle('Most Popular Foods')+
+  xlab('Recipe ID')+
+  ylab('Rating')
 ```
 
 ### Q2: What are the most common preparation/cooking steps and does this impact how the recipe is interacted with?
@@ -90,11 +95,14 @@ top_10_ingredients_list = top_10_ingredients %>%
 ```{r}
 #plotting the data
 top_10_ingredients %>%
-  ggplot(aes(x= reorder(ingredients,count), y=count, fill=ingredients))+
+  ggplot(aes(x= reorder(ingredients,count), y=count))+
   geom_bar(stat='identity') +
-  labs(title = 'most used ingredients in recipes (top 10)', x='ingredient name', y='ingredient count')
+  ggtitle("Top 10 Most Used Ingredients in Recipes") +
+  xlab("Ingredient Name") +
+  ylab("Ingredient Count")
   
 ```
+Based on this bar graph, we found that the most used ingredient is salt. The bar graph displays the most used ingredients based on the ingredient count by combining all recipes together and they are ascednding from left to right. 
 
 ### Q2: What are popular terms in titles (most appear)?
 
@@ -111,19 +119,20 @@ titles_separated = recipes %>%
   head(20)
 ```
 
-
 ```{r}
 #plotting the data
 theme_set(theme_bw())
 top_20_words = titles_separated %>%
   ggplot(aes(x=reorder(name, count), y=count))+
-  geom_point(size=3)+
-  geom_segment(aes(x=name, xend=name, y=0, yend=count))+
-  labs(title = 'top 20 words used in recipe titles', x='name')+
+  geom_bar(stat='identity') +
+  ggtitle('Top 20 Words Used in Recipe Titles')+
+  xlab('Term in Title')+
+  ylab('Term Count')+
   theme(axis.text.x = element_text(angle=65, vjust=0.6))
 
 top_20_words
 ```
+A bar graph was used to answer this question to visually see the ordering of the most popular terms used in recipe titles. Our findings show that the term 'chicken' is the most used term in recipe titles. We also found that the term 'easy' is found in the top 20 terms used in recipe titles. 
 
 # Orator: Theresa Yu
 
@@ -152,13 +161,34 @@ head(recipeinteraction)
 ```
 ```{r}
 fall = subset(recipeinteraction,season == 'fall')
-ggplot(fall, aes(x = rating)) + geom_bar()
+fall_graph = ggplot(fall, aes(x = rating)) + 
+  geom_bar() +
+  ggtitle('Fall Recipe Interaction')+
+  xlab('Rating')+
+  ylab('Count')
+
 winter = subset(recipeinteraction,season == 'winter')
-ggplot(winter, aes(x = rating)) + geom_bar()
+winter_graph = ggplot(winter, aes(x = rating)) + 
+  geom_bar()+
+  ggtitle('Winter Recipe Interaction')+
+  xlab('Rating')+
+  ylab('Count')
+
 spring = subset(recipeinteraction,season == 'spring')
-ggplot(spring, aes(x = rating)) + geom_bar()
+spring_graph = ggplot(spring, aes(x = rating)) + 
+  geom_bar()+
+  ggtitle('Spring Recipe Interaction')+
+  xlab('Rating')+
+  ylab('Count')
+
 summer = subset(recipeinteraction,season == 'summer')
-ggplot(summer, aes(x = rating)) + geom_bar()
+summer_graph = ggplot(summer, aes(x = rating)) + 
+  geom_bar()+
+  ggtitle('Summer Recipe Interaction')+
+  xlab('Rating')+
+  ylab('Count')
+
+cowplot::plot_grid(fall_graph, winter_graph, spring_graph, summer_graph)
 ```
 
 Based off of a visual scan of these 4 charts, it does not look like there is a significant pattern change in ratings based off of the season. All 4 charts look fairly similar, with there being the highest proportion of 5 ratings. 
@@ -166,7 +196,11 @@ Based off of a visual scan of these 4 charts, it does not look like there is a s
 ### Q2: Is there a correlation between recipe difficulty and the sentiment of the recipe interaction?
 
 ```{r}
-ggplot(recipeinteraction, aes(x = rating,y=n_steps+n_ingredients, group = rating)) + geom_boxplot() + ylim(0,50)
+ggplot(recipeinteraction, aes(x = rating,y=n_steps+n_ingredients, group = rating)) + geom_boxplot() + 
+  ylim(0,50)+
+  ggtitle('Recipe Ratings Compared to Difficulty of Recipe')+
+  xlab('Recipe Rating')+
+  ylab('Difficulty \n (Number of Steps + Number of Ingredients)')
 ```
 
 By using a sum of the number of steps and the number of ingredients as a proxy for difficulty of recipe, we see that there doesn't seem to be a significant correlation between that sum and the rating of the recipe. 
@@ -196,9 +230,34 @@ By using a sum of the number of steps and the number of ingredients as a proxy f
 
 ### Investigation of Follow-up Questions
 
-GIVE WHAT 2 QUESTIONS YOU ATTEMPTED TO INVESTIGATE FURTHER IN COMPLETE SENTENCES (*Example:* Our group decided to investigate Q2 and Q4 in further detail.)
+Our group decided to investigate Q2 and Q3 in further detail. 
 
-SHOW AT LEAST 2 TABLES OR FIGURES BELOW THAT EXPLORE ANSWERS FOR THE QUESTIONS YOU ARE INVESTIGATING FURTHER.
+Question 2 Graph - Is there any relationship between the # of steps in the recipe and the # of user interactions that the recipe receives?
+
+```{r}
+recipefreq =as.data.frame(table(recipeinteraction$id))
+recipefreq$id = as.numeric(as.character(recipefreq$Var1))
+
+recipefreq = recipefreq %>%
+  right_join(recipeinteraction, by='id') %>%
+  select('Freq','name')
+
+recipefreq$nameSplit = strsplit(recipefreq$name," ")
+recipefreq$nameCount = sapply(recipefreq$nameSplit,length)
+
+head(recipefreq)
+```
+
+```{r}
+ggplot(recipefreq, aes(x=nameCount, y = Freq)) + 
+  geom_point(position = 'jitter') +
+  ggtitle('Relationship Between Number of Recipe Steps and Number of User Interactions')+
+  xlab('Number of Recipe Steps') +
+  geom_smooth(method=lm, color="red")+
+  ylab('Number of User Interactions')
+```
+
+Question 3 Graph - Does the number of ingredients impact the rating given to the recipe?
 
 ```{r}
 # Question 3 
@@ -225,12 +284,12 @@ colnames(recipe_ingredients_ratings)[3] = "rating"
 recipe_ingredients_ratings %>%
   ggplot(aes(x=rating, y=n_ingredients, color=rating))+
   geom_point(alpha=1/10) +
-  geom_smooth(method=lm)
-  labs(title='correlation between ratings and number of ingredients used in a recipe')
-```
-
-```{r}
-#
+  geom_smooth(method=lm)+
+  stat_cor(method = "pearson", label.x = 3, label.y = 18)+
+  ggtitle('Correlation Between Ratings and Number of Ingredients Used in a Recipe')+
+  xlab('Recipe Rating')+
+  ylab('Number of Ingredients')+
+  ylim(0, 20)
 ```
 
 # Summary
@@ -239,12 +298,23 @@ GIVE A 2 PARAGRAPH SUMMARY.
 
 PARAGRAPH 1 SHOULD DESCRIBE WHAT YOU LEARNED ABOUT YOUR DATA FROM INVESTIGATING THE INITIAL QUESTIONS. DID YOU FIND ANYTHING UNUSUAL IN YOUR DATA? DID ANYTHING SURPRISE YOU? WHICH OF THE INITIAL QUESTIONS WERE HELPFUL IN LEADING YOU TO MORE QUESTIONS?
 
+The questions proposed by the creator prompted to create a scatter plot to show where the recipe ratings fall when combined. It was surprising to see that most ratings fall in the 4 or 5 star rating. We initially thought that the user would leave critiques based on the effort to rate the recipe. 
+
 In the interpreter's question's, we found that we had to perform some type of stop word removal for the second question. Something unusual in that data set was the use of the word 'easy' being a common word to a recipe's title, whereas the other top 20 names include some relation to food.  
 In the two questions given by the orator, the results for fairly inconclusive. Based off of the graphs that were made in pursuit of finding an answer for these questions, we were unable to conclude whether there was a distinct relationship between the variables. Something unusual we found here was that there is a disproportionate amount of 5 star ratings. 
 
+The questions that the deliverer proposed...
+
+The initial questions provided by the creator and orator were helpful in leading to more questions. These new questions mostly mention recipe user interaction and another variable such as number of steps and length of title. 
+
 PARAGRAPH 2 SHOULD SUMMARIZE WHAT YOU LEARNED FROM INVESTIGATING THE FOLLOW-UP QUESTIONS. WHY ARE THESE FOLLOW-UP QUESTIONS INTERESTING FOR INVESTIGATION? DESCRIBE THE TABLES/FIGURES YOU USED TO EXPLORE ANSWERS TO THESE FOLLOW-UP QUESTIONS? WHAT DID YOU LEARN FROM THE TABLES/FIGURES REGARDING THE FOLLOW-UP QUESTIONS YOU PROPOSED?
 
-These follow up questions are important for further investigation because they tackle a more in-depth analysis. For our third question, we used a correlation plot to visually see the correlation, if any, between the number of ingredients used in a recipe and the average rating given to that recipe. We specifically utilized the recipes that had over 100 ratings to better narrow down our data set. If we were to include all the data points, we would have recipes that have one user star rating, which would not impact the overall average rating of that recipe. Despite this change, our findings show that there is little to no correlation between the number of ingredients used in a recipe and the average user rating for that recipe. Our initial thoughts were that the more ingredients used, the lower the ratings because there might have been some difficulty on behalf of the user because of the number of ingredients used. 
+These follow up questions are important for further investigation because they tackle a more in-depth analysis. 
+
+In regards to the second follow-up question, we were able to create a...
+
+For our third question, we used a scatter plot to visually see the correlation, if any, between the number of ingredients used in a recipe and the average rating given to that recipe. We specifically utilized the recipes that had over 100 ratings to better narrow down our data set. If we were to include all the data points, we would have recipes that have one user star rating, which would not impact the overall average rating of that recipe. Despite this change, our findings show that there is little to no correlation between the number of ingredients used in a recipe and the average user rating for that recipe. Our initial thoughts were that the more ingredients used, the lower the ratings because there might have been some difficulty on behalf of the user because of the number of ingredients used. 
+
 
 
 
