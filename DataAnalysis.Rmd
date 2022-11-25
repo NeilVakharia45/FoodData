@@ -21,9 +21,21 @@ raw_recipes = read_csv("C:\\Users\\Neil\\Downloads\\FoodData\\RAW_recipes.csv")
 
 ```{r}
 recipes = left_join(pp_recipes, raw_recipes, by="id")
-recipes = subset(recipes, select = -c(i) )
+recipes = subset(recipes, select = -c(i, name_tokens, ingredient_tokens, steps_tokens))
 head(recipes)
 ```
+
+techniques (number of techniques)
+
+calorie level
+
+ingredient_ids - look at the most common ingredients
+
+minutes
+
+nutrition
+
+n_steps
 
 ```{r}
 head(users)
@@ -41,3 +53,42 @@ ggplot(interactions)+
 ```
 
 As seen in the graph above, there is a very uneven distribution of ratings. This can be largely attributed to volunteer response bias; the people most likely to write a review are those who were already in the head space of looking for a good recipe, and many home cooks are likely to appreciate the creativity, heart, soul, and passion found in others' Food.com recipes. Although this is our main response variable, we did not feel that it would be beneficial to perform oversampling of the less frequent ratings or under sampling of the more frequent ratings. Not only are recipes so complex and variable to change (leaving data generation to be very difficult), but we did not want to misrepresent the true distribution of positive and less positive ratings. Thus, we will not only pay attention to what are common features among highly rated recipes, but what are surefire ways to get a bad review in the eyes of the home-cook-crowd.
+
+\_\_\_
+
+When looking at recipes, we wanted to quantify
+
+```{r}
+grouped_interactions=interactions %>% 
+  group_by(recipe_id) %>% 
+  summarise(total_count=n(),.groups = 'drop')
+
+#grouped_interactions=grouped_interactions[order(grouped_interactions$total_count), decreasing=T]
+
+head(grouped_interactions)
+```
+
+```{r}
+  ggplot(grouped_interactions) +
+   geom_point(aes(x=recipe_id, y=total_count))
+```
+
+We read the reviews. These reviews are really inconsistent. Some people used 5's to say sufficiently good. Some people used 5's to say they were ecstatic. Because our ratings were somewhat arbitrary and subject to a lot of variability, we used the strategy: if under 50, take the mode. if over 50, take the round the average. We use mode because it is ordinal and arbitrary. FIX THIS
+
+Because there were so many recipes that were reviewed so positively, our first theory was that because Food.com's target demographic is primarily home cooks and those looking to elevate their culinary breadth, users were purposefully making the recipes easy to digest for a non-professional crowd. To quantify this, we looked at metrics of recipe difficulty: the number of techniques, the number of ingredients, the amount of minutes the recipe took, and the number of steps.
+
+```{r}
+
+```
+
+techniques (number of techniques)
+
+calorie level
+
+ingredient_ids - look at the most common ingredients
+
+minutes
+
+nutrition
+
+n_steps
