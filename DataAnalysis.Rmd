@@ -61,7 +61,7 @@ When looking at recipes, we wanted to quantify
 ```{r}
 grouped_interactions=interactions %>% 
   group_by(recipe_id) %>% 
-  summarise(total_count=n(),.groups = 'drop')
+  summarise(total_count=n(), .groups = 'drop')
 
 #grouped_interactions=grouped_interactions[order(grouped_interactions$total_count), decreasing=T]
 
