@@ -25,18 +25,6 @@ recipes = subset(recipes, select = -c(i, name_tokens, ingredient_tokens, steps_t
 head(recipes)
 ```
 
-techniques (number of techniques)
-
-calorie level
-
-ingredient_ids - look at the most common ingredients
-
-minutes
-
-nutrition
-
-n_steps
-
 ```{r}
 head(users)
 ```
@@ -61,34 +49,35 @@ When looking at recipes, we wanted to quantify
 ```{r}
 grouped_interactions=interactions %>% 
   group_by(recipe_id) %>% 
-  summarise(total_count=n(), .groups = 'drop')
+  summarise(total_count=n(), average_rating=mean(rating), .groups = 'drop')
 
-#grouped_interactions=grouped_interactions[order(grouped_interactions$total_count), decreasing=T]
+ggplot(grouped_interactions) +
+  geom_point(aes(x=recipe_id, y=total_count))
 
-head(grouped_interactions)
+relevant_recipes=grouped_interactions[grouped_interactions$total_count>=10,]
+length(relevant_recipes$recipe_id)
+
+head(relevant_recipes)
+
+recipes=left_join(relevant_recipes, recipes, by=c("recipe_id"="id"))
+
+head(recipes)
 ```
 
 ```{r}
-  ggplot(grouped_interactions) +
-   geom_point(aes(x=recipe_id, y=total_count))
+
 ```
 
-We read the reviews. These reviews are really inconsistent. Some people used 5's to say sufficiently good. Some people used 5's to say they were ecstatic. Because our ratings were somewhat arbitrary and subject to a lot of variability, we used the strategy: if under 50, take the mode. if over 50, take the round the average. We use mode because it is ordinal and arbitrary. FIX THIS
+We read the reviews. These reviews are really inconsistent. Some people used 5's to say sufficiently good. Some people used 5's to say they were ecstatic. Because our ratings were somewhat arbitrary and subject to a lot of variability, we used the strategy: remove anything under 10
 
 Because there were so many recipes that were reviewed so positively, our first theory was that because Food.com's target demographic is primarily home cooks and those looking to elevate their culinary breadth, users were purposefully making the recipes easy to digest for a non-professional crowd. To quantify this, we looked at metrics of recipe difficulty: the number of techniques, the number of ingredients, the amount of minutes the recipe took, and the number of steps.
 
 ```{r}
 
+recipes$number_of_techniques=eval(parse(text = paste0("c", chartr('[]', '()', recipes$techniques))))
+
+str_split(fruits, ", ", n = 3)
+
+head(recipes$number_of_techniques)
+
 ```
-
-techniques (number of techniques)
-
-calorie level
-
-ingredient_ids - look at the most common ingredients
-
-minutes
-
-nutrition
-
-n_steps
