@@ -1,0 +1,109 @@
+---
+title: "Food Data Analytics"
+author: "STOR 320/520.002 Group 11"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: html_document
+---
+
+Import Data
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(dplyr)
+
+# Import Data Below
+users = read_csv('PP_users.csv')
+pp_recipes = read_csv('PP_recipes.csv')
+interactions = read_csv('RAW_interactions.csv')
+raw_recipes = read_csv('RAW_recipes.csv')
+```
+
+```{r}
+recipes = left_join(pp_recipes, raw_recipes, by="id")
+recipes = subset(recipes, select = -c(i, name_tokens, ingredient_tokens, steps_tokens))
+head(recipes)
+```
+
+techniques (number of techniques)
+
+calorie level
+
+ingredient_ids - look at the most common ingredients
+
+minutes
+
+nutrition
+
+n_steps
+
+```{r}
+head(users)
+```
+
+```{r}
+head(interactions)
+```
+
+Because interactions are the intersection of recipes and users, we decided to explore the interactions more, specifically the rating column. Since we are interested in predicting the ratings, we decided to look at the distribution of the ratings through a histogram.
+
+```{r}
+ggplot(interactions)+
+  geom_histogram(aes(rating))+
+  xlab('Rating')+
+  ylab('Count')+
+  ggtitle('Distribution of Ratings')+
+  theme(plot.title = element_text(hjust =0.5))
+```
+
+As seen in the graph above, there is a very uneven distribution of ratings. This can be largely attributed to volunteer response bias; the people most likely to write a review are those who were already in the head space of looking for a good recipe, and many home cooks are likely to appreciate the creativity, heart, soul, and passion found in others' Food.com recipes. Although this is our main response variable, we did not feel that it would be beneficial to perform oversampling of the less frequent ratings or under sampling of the more frequent ratings. Not only are recipes so complex and variable to change (leaving data generation to be very difficult), but we did not want to misrepresent the true distribution of positive and less positive ratings. Thus, we will not only pay attention to what are common features among highly rated recipes, but what are surefire ways to get a bad review in the eyes of the home-cook-crowd.
+
+\_\_\_
+
+When looking at recipes, we wanted to quantify
+
+```{r}
+grouped_interactions=interactions %>% 
+  group_by(recipe_id) %>% 
+  summarise(total_count=n(), average_rating=mean(rating), .groups = 'drop')
+
+ggplot(grouped_interactions) +
+  geom_point(aes(x=recipe_id, y=total_count, colour=total_count>10))+
+  scale_colour_manual(values=c('Black','Red'))+
+  labs(color="Total Count of Reviews > 10")+
+  xlab('Recipe ID')+
+  ylab('Total Count of Reviews')+
+  ggtitle('Number of Rating Reviews for Recipes')+
+  theme(plot.title = element_text(hjust =0.5))
+
+
+relevant_recipes=grouped_interactions[grouped_interactions$total_count>=10,]
+length(relevant_recipes$recipe_id)
+head(relevant_recipes)
+
+recipes=left_join(relevant_recipes, recipes, by=c("recipe_id"="id"))
+head(recipes)
+```
+
+
+We read the reviews. These reviews are really inconsistent. Some people used 5's to say sufficiently good. Some people used 5's to say they were ecstatic. Because our ratings were somewhat arbitrary and subject to a lot of variability, we used the strategy: if under 50, take the mode. If over 50, take the round the average. We use mode because it is ordinal and arbitrary. FIX THIS
+
+Because there were so many recipes that were reviewed so positively, our first theory was that because Food.com's target demographic is primarily home cooks and those looking to elevate their culinary breadth, users were purposefully making the recipes easy to digest for a non-professional crowd. To quantify this, we looked at metrics of recipe difficulty: the number of techniques, the number of ingredients, the amount of minutes the recipe took, and the number of steps.
+
+```{r}
+#recipes$number_of_techniques=eval(parse(text = paste0("c", chartr('[]', '()', recipes$techniques))))
+#str_split(fruits, ", ", n = 3)
+#head(recipes$number_of_techniques)
+```
+
+techniques (number of techniques)
+
+calorie level
+
+ingredient_ids - look at the most common ingredients
+
+minutes
+
+nutrition
+
+n_steps
