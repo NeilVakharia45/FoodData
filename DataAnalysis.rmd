@@ -11,6 +11,7 @@ Import Data
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(dplyr)
+library(ggpubr)
 
 # Import Data Below
 users = read_csv('PP_users.csv')
@@ -24,18 +25,10 @@ recipes = left_join(pp_recipes, raw_recipes, by="id")
 recipes = subset(recipes, select = -c(i, name_tokens, ingredient_tokens, steps_tokens))
 head(recipes)
 ```
-
-techniques (number of techniques)
-
-calorie level
-
-ingredient_ids - look at the most common ingredients
-
-minutes
-
-nutrition
-
-n_steps
+```{r}
+pp_recipes$TechniqueCount = str_count(pp_recipes$techniques, '1')
+head(pp_recipes)
+```
 
 ```{r}
 head(users)
@@ -50,10 +43,10 @@ Because interactions are the intersection of recipes and users, we decided to ex
 ```{r}
 ggplot(interactions)+
   geom_histogram(aes(rating))+
-  xlab('Rating')+
+  ('Rating')+
   ylab('Count')+
   ggtitle('Distribution of Ratings')+
-  theme(plot.title = element_text(hjust =0.5))
+  theme(plot.title = element_text(hjust =0.5))xlab
 ```
 
 As seen in the graph above, there is a very uneven distribution of ratings. This can be largely attributed to volunteer response bias; the people most likely to write a review are those who were already in the head space of looking for a good recipe, and many home cooks are likely to appreciate the creativity, heart, soul, and passion found in others' Food.com recipes. Although this is our main response variable, we did not feel that it would be beneficial to perform oversampling of the less frequent ratings or under sampling of the more frequent ratings. Not only are recipes so complex and variable to change (leaving data generation to be very difficult), but we did not want to misrepresent the true distribution of positive and less positive ratings. Thus, we will not only pay attention to what are common features among highly rated recipes, but what are surefire ways to get a bad review in the eyes of the home-cook-crowd.
@@ -66,7 +59,8 @@ When looking at recipes, we wanted to quantify
 grouped_interactions=interactions %>% 
   group_by(recipe_id) %>% 
   summarise(total_count=n(), average_rating=mean(rating), .groups = 'drop')
-
+```
+```{r}
 ggplot(grouped_interactions) +
   geom_point(aes(x=recipe_id, y=total_count, colour=total_count>10))+
   scale_colour_manual(values=c('Black','Red'))+
@@ -75,16 +69,48 @@ ggplot(grouped_interactions) +
   ylab('Total Count of Reviews')+
   ggtitle('Number of Rating Reviews for Recipes')+
   theme(plot.title = element_text(hjust =0.5))
-
-
+```
+```{r}
 relevant_recipes=grouped_interactions[grouped_interactions$total_count>=10,]
 length(relevant_recipes$recipe_id)
 head(relevant_recipes)
-
+```
+```{r}
 recipes=left_join(relevant_recipes, recipes, by=c("recipe_id"="id"))
 head(recipes)
 ```
 
+
+```{r}
+head(relevant_recipes)
+```
+
+```{r}
+#to remove NA's
+recipes= select(recipes, "average_rating", "n_steps", "n_ingredients")
+recipes = recipes %>%
+  drop_na()
+head(recipes)
+```
+```{r}
+ggplot(recipes, aes(x = average_rating, y = minutes)) + 
+  geom_point() +
+  stat_smooth(method = "lm", col = "red")+
+  xlab('Average Rating')+
+  ylab('Recipe Minutes')+
+  ggtitle('Relationship between Average Rating and Recipe Minutes')+
+  stat_cor(method = "pearson", label.x = 0, label.y = 1020)+
+  theme(plot.title = element_text(hjust =0.5))
+
+```
+
+```{r}
+cov_recipes = cov(recipes)
+colnames(cov_recipes) = c("Average Rating", "Number of Steps", "Number of Ingredients")
+rownames(cov_recipes) =c("Average Rating", "Number of Steps", "Number of Ingredients")
+corrplot(cov_recipes, is.corr=FALSE, method="square", col=colorRampPalette(c("white","lightblue","red"))(100), title="Analysis of Covariance", mar=c(0,0,1,0))
+```
+A positive value for the covariance matrix indicates that two variables tend to increase or decrease sequentially. A negative value for the covariance matrix indicates that as one variable increases, the second variable tends to decrease.
 
 We read the reviews. These reviews are really inconsistent. Some people used 5's to say sufficiently good. Some people used 5's to say they were ecstatic. Because our ratings were somewhat arbitrary and subject to a lot of variability, we used the strategy: if under 50, take the mode. If over 50, take the round the average. We use mode because it is ordinal and arbitrary. FIX THIS
 
