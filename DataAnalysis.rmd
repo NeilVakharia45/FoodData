@@ -62,7 +62,7 @@ grouped_interactions=interactions %>%
 ```
 ```{r}
 ggplot(grouped_interactions) +
-  geom_point(aes(x=recipe_id, y=total_count, colour=total_count>10))+
+  geom_point(size=.1, aes(x=recipe_id, y=total_count, colour=total_count>10))+
   scale_colour_manual(values=c('Black','Red'))+
   labs(color="Total Count of Reviews > 10")+
   xlab('Recipe ID')+
